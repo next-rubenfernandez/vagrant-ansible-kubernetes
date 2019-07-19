@@ -1,0 +1,22 @@
+---
+# tasks file for kubernetes-common
+
+- name: Set SELinux permissive
+  selinux: 
+    policy: targeted 
+    state: permissive
+
+- name: Install pkgs
+  yum: 
+    name: "{{ item }}"
+    state: present 
+  with_items:
+    - deltarpm
+    - epel-release
+    - wget
+    - ntp
+    - jq
+    - git
+    - net-tools
+    - bind-utils
+    - moreutils
