@@ -6,17 +6,21 @@
     policy: targeted 
     state: permissive
 
-- name: Install pkgs
+- name: Install pkgs {{ packages }}
   yum: 
-    name: "{{ item }}"
+    name: "{{ packages }}"
     state: present 
-  with_items:
-    - deltarpm
-    - epel-release
-    - wget
-    - ntp
-    - jq
-    - git
-    - net-tools
-    - bind-utils
-    - moreutils
+  vars:
+    packages:
+      - deltarpm
+      - epel-release
+      - wget
+      - ntp
+      #- jq
+      - git
+      - net-tools
+      - bind-utils
+      #- moreutils
+      - yum-utils 
+      - device-mapper-persistent-data 
+      - lvm2

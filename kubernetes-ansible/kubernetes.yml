@@ -1,8 +1,8 @@
 ---
-- name: Hello World!
-  hosts: nodes
- 
-  tasks:
- 
-  - name: Hello World!
-    shell: echo "Hi! Tower is working."
+- name: Kubernetes Common
+  hosts: all
+  become: true
+  gather_facts: yes
+
+  roles:
+  - kubernetes-common
