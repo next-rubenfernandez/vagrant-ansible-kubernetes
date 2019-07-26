@@ -15,6 +15,7 @@ Vagrant.configure("2") do |config|
       nodeconfig.vm.box_check_update = false
       nodeconfig.vm.hostname = node[:hostname] + ".box"
       nodeconfig.vm.network :private_network, ip: node[:ip]
+      nodeconfig.vm.network "public_network"
       memory = node[:ram] ? node[:ram] : 256;
       
       nodeconfig.vm.provider :virtualbox do |vb|
@@ -24,6 +25,9 @@ Vagrant.configure("2") do |config|
           "--cpus", "4"
         ]
       end
+
+      nodeconfig.vm.provision "shell",
+        inline: "yum update -y"
 
       nodeconfig.vm.provision :ansible do |ansible|
         ansible.playbook = "kubernetes-ansible/kubernetes.yml"

@@ -1,2 +1,44 @@
 ---
 # tasks file for docker
+
+- name: Docker | Add Docker yum repository
+  yum_repository:
+    name: Docker
+    description: Docker Repository
+    file: docker
+    baseurl: https://download.docker.com/linux/centos/7/x86_64/stable/
+    enabled: yes
+    gpgcheck: no
+  when: ansible_os_family == "RedHat"
+
+# Handler showing how to clean yum metadata cache
+- name: yum-clean-metadata
+  command: yum clean metadata
+  args:
+    warn: no
+
+- name: Docker | Install docker engine (RHEL/CentOS)
+  yum:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+  when: ansible_os_family == "RedHat"
+
+- name: Ensure group "docker" exists
+  group:
+    name: docker
+    state: present
+
+- name: Add the user 'docker' to group 'docker'
+  user:
+    name: docker
+    group: docker
+
+- name: enable service docker
+  systemd:
+    name: docker
+    enabled: yes
