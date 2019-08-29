@@ -2,13 +2,8 @@
 # tasks file for docker
 
 - name: Docker | Add Docker yum repository
-  yum_repository:
-    name: Docker
-    description: Docker Repository
-    file: docker
-    baseurl: https://download.docker.com/linux/centos/7/x86_64/stable/
-    enabled: yes
-    gpgcheck: no
+  command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  become: true
   when: ansible_os_family == "RedHat"
 
 # Handler showing how to clean yum metadata cache
@@ -17,7 +12,7 @@
   args:
     warn: no
 
-- name: Docker | Install docker engine (RHEL/CentOS)
+- name: Docker | Install docker engine {{ packages }} (RHEL/CentOS)
   yum:
     name: "{{ packages }}"
     state: present
@@ -28,17 +23,38 @@
       - containerd.io
   when: ansible_os_family == "RedHat"
 
-- name: Ensure group "docker" exists
+- name: Docker | Ensure group "docker" exists
   group:
     name: docker
     state: present
 
-- name: Add the user 'docker' to group 'docker'
+- name: Docker | Add the user 'docker' to group 'docker'
   user:
     name: docker
     group: docker
 
-- name: enable service docker
+- name: Docker | enable service docker
   systemd:
     name: docker
     enabled: yes
+
+- name: Docker | Create config folder
+  file:
+    path: /etc/docker
+    state: directory
+    owner: docker
+    group: docker
+
+- name: Docker | Template daemon.json
+  template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    owner: docker
+    group: docker
+    mode: '0644'
+
+- name: Docker | Create folder
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+  notify: docker_start
