@@ -29,6 +29,7 @@
     state: present
 
 - name: Docker | Add docker user to docker group
+  user:
     name: docker
     group: docker
 

@@ -7,4 +7,12 @@
   roles:
   - kubernetes-common
   - docker
+
+
+- name: Kubernetes Master
+  hosts: master
+  become: true
+  gather_facts: yes
+
+  roles:
   - kubernetes
