@@ -2,10 +2,10 @@
 # vi: set ft=ruby :
 
 nodes = [
-  { :hostname => 'kubernetes-master', :ip => '192.168.10.2', :ram => 4096 },
-  { :hostname => 'kubernetes-node1', :ip => '192.168.10.3', :ram => 2048 },
-  { :hostname => 'kubernetes-node2', :ip => '192.168.10.4', :ram => 2048 },
-  { :hostname => 'kubernetes-node3', :ip => '192.168.10.5', :ram => 2048 }
+  { :hostname => 'kubernetes-master', :ip => '192.168.10.2', :ram => 2048 },
+  { :hostname => 'kubernetes-node1', :ip => '192.168.10.3', :ram => 1024 },
+  { :hostname => 'kubernetes-node2', :ip => '192.168.10.4', :ram => 1024 },
+  { :hostname => 'kubernetes-node3', :ip => '192.168.10.5', :ram => 1024 }
 ]
 
 Vagrant.configure("2") do |config|
@@ -22,7 +22,8 @@ Vagrant.configure("2") do |config|
         vb.customize [
           "modifyvm", :id,
           "--memory", memory.to_s,
-          "--cpus", "4"
+          "--cpus", "4",
+          "--audio", "none"
         ]
       end
 
