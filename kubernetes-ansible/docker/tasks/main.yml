@@ -28,9 +28,13 @@
     name: docker
     state: present
 
-- name: Docker | Add the user 'docker' to group 'docker'
-  user:
+- name: Docker | Add docker user to docker group
     name: docker
+    group: docker
+
+- name: Docker | Add vagrant user to docker group
+  user:
+    name: vagrant
     group: docker
 
 - name: Docker | enable service docker
