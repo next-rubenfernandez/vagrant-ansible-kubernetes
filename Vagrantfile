@@ -1,46 +1,51 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-
-nodes = [
-  { :hostname => 'kubernetes-master', :ip => '192.168.10.2', :ram => 2048 },
-  { :hostname => 'kubernetes-node1', :ip => '192.168.10.3', :ram => 1024 },
-  { :hostname => 'kubernetes-node2', :ip => '192.168.10.4', :ram => 1024 },
-  { :hostname => 'kubernetes-node3', :ip => '192.168.10.5', :ram => 1024 }
-]
+N = 2
 
 Vagrant.configure("2") do |config|
-  nodes.each do |node|
-    config.vm.define node[:hostname] do |nodeconfig|
-      nodeconfig.vm.box = "centos/7";
-      nodeconfig.vm.box_check_update = false
-      nodeconfig.vm.hostname = node[:hostname] + ".box"
-      nodeconfig.vm.network :private_network, ip: node[:ip]
-      nodeconfig.vm.network "public_network"
-      memory = node[:ram] ? node[:ram] : 256;
-      
-      nodeconfig.vm.provider :virtualbox do |vb|
-        vb.customize [
+  config.ssh.insert_key = false
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 1024
+    v.cpus = 2
+    v.customize [
           "modifyvm", :id,
-          "--memory", memory.to_s,
-          "--cpus", "4",
           "--audio", "none"
         ]
-      end
+  end
 
-      nodeconfig.vm.provision "shell",
-        inline: "yum update -y"
-
-      nodeconfig.vm.provision :ansible do |ansible|
+  config.vm.define "k8s-master" do |master|
+    master.vm.box = "centos/7"
+    master.vm.network "private_network", ip: "192.168.50.10"
+    master.vm.hostname = "k8s-master"
+    master.vm.provision "ansible" do |ansible|
+      ansible.playbook = "kubernetes-ansible/kubernetes.yml"
+      ansible.groups = {
+          "master" => ["k8s-master"],
+          "master:vars" => { "product" => "k8s-master" },
+          "all:children" => ["master"]
+        }
+      ansible.extra_vars = {
+        node_ip: "192.168.50.10",
+      }
+    end
+  end
+    
+  (1..N).each do |i|
+    config.vm.define "k8s-node-#{i}" do |node|
+      node.vm.box = "centos/7"
+      node.vm.network "private_network", ip: "192.168.50.#{i + 10}"
+      node.vm.hostname = "k8s-node-#{i}"
+      node.vm.provision "ansible" do |ansible|
         ansible.playbook = "kubernetes-ansible/kubernetes.yml"
         ansible.groups = {
-          "master" => ["kubernetes-master"],
-          "master:vars" => { "product" => "master" },
-          "nodes" => ["kubernetes-node1","kubernetes-node2","kubernetes-node3"],
-          "nddes:vars" => { "product" => "nodes" },
-          "all:children" => ["master", "nodes"]
+          "nodes" => ["k8s-nodes"],
+          "nodes:vars" => { "product" => "k8s-nodes" },
+          "all:children" => ["nodes"]
+        }
+        ansible.extra_vars = {
+          node_ip: "192.168.50.#{i + 10}",
         }
       end
-
     end
   end
 end

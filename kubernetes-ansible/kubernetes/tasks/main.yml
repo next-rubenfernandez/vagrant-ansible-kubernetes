@@ -50,7 +50,7 @@
 - name: Kubernetes | Configure node ip
   lineinfile:
     path: /etc/default/kubelet
-    line: KUBELET_EXTRA_ARGS=--node-ip={{ ip }}
+    line: KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }}
   notify: kubelet_restart
 
 # - name: Create service drop-in directory
@@ -65,7 +65,7 @@
 #   template: src=20-extra-args.conf.j2 dest=/etc/systemd/system/kubelet.service.d/20-extra-args.conf
 
 - name: Initialize the Kubernetes cluster using kubeadm
-  command: kubeadm init --apiserver-advertise-address="192.168.50.10" --apiserver-cert-extra-sans="192.168.50.10"  --node-name k8s-master --pod-network-cidr=192.168.0.0/16
+  command: kubeadm init --apiserver-advertise-address="192.168.10.2" --apiserver-cert-extra-sans="192.168.10.2"  --node-name k8s-master --pod-network-cidr=192.168.10.0/16
 
 - name: Setup kubeconfig for vagrant user
   command: "{{ item }}"
