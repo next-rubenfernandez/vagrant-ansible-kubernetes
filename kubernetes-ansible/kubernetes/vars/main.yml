@@ -12,3 +12,6 @@ kubernetes_packages:
   - kubelet 
   - kubeadm 
   - kubectl
+
+kubernetes_services:
+  - kubelet

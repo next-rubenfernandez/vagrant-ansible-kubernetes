@@ -1,2 +1,4 @@
 ---
 # vars file for docker
+
+docker_version: 18.09.9-3.el7

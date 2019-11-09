@@ -25,7 +25,7 @@ Vagrant.configure("2") do |config|
           "all:children" => ["master"]
         }
       ansible.extra_vars = {
-        node_ip: "192.168.50.10",
+        node_ip: "192.168.50.10"
       }
     end
   end

@@ -12,15 +12,14 @@
   args:
     warn: no
 
-- name: Docker | Install docker engine {{ packages }} (RHEL/CentOS)
+- name: Docker | Install docker engine {{ packages }} {{ docker_version }} (RHEL/CentOS)
   yum:
     name: "{{ packages }}"
     state: present
   vars:
     packages:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
+      - docker-ce-{{ docker_version }}
+      - docker-ce-cli-{{ docker_version }}
   when: ansible_os_family == "RedHat"
 
 - name: Docker | Ensure group "docker" exists
@@ -37,11 +36,6 @@
   user:
     name: vagrant
     group: docker
-
-- name: Docker | enable service docker
-  systemd:
-    name: docker
-    enabled: yes
 
 - name: Docker | Create config folder
   file:
@@ -62,4 +56,10 @@
   file:
     path: /etc/systemd/system/docker.service.d
     state: directory
-  notify: docker_start
+
+- name: Docker | Start service docker
+  systemd:
+    name: docker
+    daemon_reload: yes
+    state: started
+    enabled: yes
