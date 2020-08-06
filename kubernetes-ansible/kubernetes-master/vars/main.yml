@@ -7,11 +7,5 @@ network_dir: /etc/kubernetes/network
 kubeadmin_config: /etc/kubernetes/admin.conf
 kube_addon_dir: /etc/kubernetes/addon
 
-
-kubernetes_packages:
-  - kubelet 
-  - kubeadm 
-  - kubectl
-
 kubernetes_services:
   - kubelet

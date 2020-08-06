@@ -18,7 +18,7 @@ Vagrant.configure("2") do |config|
     master.vm.network "private_network", ip: "192.168.50.10"
     master.vm.hostname = "k8s-master"
     master.vm.provision "ansible" do |ansible|
-      ansible.playbook = "kubernetes-ansible/kubernetes.yml"
+      ansible.playbook = "kubernetes-ansible/kubernetes-master.yml"
       ansible.groups = {
           "master" => ["k8s-master"],
           "master:vars" => { "product" => "k8s-master" },
@@ -36,9 +36,9 @@ Vagrant.configure("2") do |config|
       node.vm.network "private_network", ip: "192.168.50.#{i + 10}"
       node.vm.hostname = "k8s-node-#{i}"
       node.vm.provision "ansible" do |ansible|
-        ansible.playbook = "kubernetes-ansible/kubernetes.yml"
+        ansible.playbook = "kubernetes-ansible/kubernetes-nodes.yml"
         ansible.groups = {
-          "nodes" => ["k8s-nodes"],
+          "nodes" => ["k8s-node-1,k8s-node-2"],
           "nodes:vars" => { "product" => "k8s-nodes" },
           "all:children" => ["nodes"]
         }

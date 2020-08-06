@@ -1,0 +1,79 @@
+---
+# tasks file for common
+
+- name: Common | Set SELinux permissive
+  selinux: 
+    policy: targeted 
+    state: permissive
+
+- name: Common | Install pkgs {{ packages }}
+  yum: 
+    name: "{{ packages }}"
+    state: present 
+
+- name: Common | Add Kubernetes yum repository (RHEL/CentOS)
+  yum_repository:
+    name: Kubernetes
+    description: Kubernetes Repository
+    file: kubernetes
+    baseurl: http://yum.kubernetes.io/repos/kubernetes-el7-x86_64
+    enabled: yes
+    gpgcheck: yes
+    gpgkey:
+      - "https://packages.cloud.google.com/yum/doc/yum-key.gpg"
+      - "https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg"
+
+- name: Common | Install kubernetes packages (RHEL/CentOS)
+  yum:
+    name: "{{ kubernetes_packages }}"
+    update_cache: yes
+    state: installed
+    disable_excludes: kubernetes
+
+- name: Common | Enable kubelet service 
+  systemd:
+    name: kubelet
+    daemon_reload: yes
+    state: started
+    enabled: yes
+
+- name: Common | Disable SWAP since kubernetes can't work with swap enabled (1/2)
+  shell: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: Common | Disable SWAP in fstab since kubernetes can't work with swap enabled (2/2)
+  replace:
+    path: /etc/fstab
+    regexp: '^(.+?\sswap\s+sw\s+.*)$'
+    replace: '# \1'
+
+- name: Common | Disable swappiness and pass bridged IPv4 traffic to iptable's chains
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+  with_items:
+    - { name: 'vm.swappiness', value: '0' }
+
+- name: Common | Copy k8s.conf with sysctl net.bridge.bridge-nf-call-iptables
+  copy:
+    src: k8s.conf
+    dest: /etc/sysctl.d/k8s.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Common | Config completion bash kubectl
+  command: kubectl completion bash
+  register: kubectl_completion_bash
+
+- name: Common | Configure node ip
+  lineinfile:
+    path: /etc/sysconfig/kubelet
+    line: KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }}
+
+- name: Common | Restart kubelet
+  systemd:
+    name: kubelet
+    daemon_reload: yes
+    state: restarted

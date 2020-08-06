@@ -1,0 +1,38 @@
+---
+# tasks file for kubernetes
+
+- name: Initialize the Kubernetes cluster using kubeadm
+  command: kubeadm init --apiserver-advertise-address=192.168.50.10 --pod-network-cidr=10.244.0.0/16
+  register: output_kubeadm_init
+
+- name: Print kubeadm init
+  debug:
+    var: output_kubeadm_init.stdout_lines
+
+- name: Create a directory if it does not exist
+  file:
+    path: /home/vagrant/.kube
+    owner: vagrant
+    group: vagrant
+    state: directory
+    mode: '0750'
+
+- name: Setup kubeconfig for vagrant user
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/vagrant/.kube/config
+    owner: vagrant
+    group: vagrant
+    remote_src: yes
+
+- name: Install flannel pod network
+  become: false
+  command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.12.0/Documentation/kube-flannel.yml
+
+- name: Generate join command
+  command: kubeadm token create --print-join-command
+  register: join_command
+
+- name: Copy join command to local file
+  local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="/tmp/join-command"
+  become: false

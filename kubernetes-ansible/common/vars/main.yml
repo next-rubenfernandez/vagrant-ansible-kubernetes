@@ -1,0 +1,19 @@
+---
+# vars file for common
+
+kubernetes_packages:
+  - kubelet 
+  - kubeadm 
+  - kubectl
+
+packages:
+  - deltarpm
+  - epel-release
+  - wget
+  - ntp
+  - git
+  - net-tools
+  - bind-utils
+  - yum-utils 
+  - device-mapper-persistent-data 
+  - lvm2

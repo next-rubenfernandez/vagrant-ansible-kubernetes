@@ -1,0 +1,10 @@
+---
+- name: Kubernetes Common
+  hosts: all
+  become: true
+  gather_facts: yes
+
+  roles:
+  - common
+  - docker
+  - kubernetes-master
