@@ -41,11 +41,20 @@
   shell: swapoff -a
   when: ansible_swaptotal_mb > 0
 
-- name: Common | Disable SWAP in fstab since kubernetes can't work with swap enabled (2/2)
-  replace:
-    path: /etc/fstab
-    regexp: '^(.+?\sswap\s+sw\s+.*)$'
-    replace: '# \1'
+#- name: Common | Disable SWAP in fstab since kubernetes can't work with swap enabled (2/2)
+#  replace:
+#    path: /etc/fstab
+#    regexp: '^(.+?\sswap\s+sw\s+.*)$'
+#    replace: '# \1'
+
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  with_items:
+    - swap
+    - none
 
 - name: Common | Disable swappiness and pass bridged IPv4 traffic to iptable's chains
   sysctl:
